@@ -1,0 +1,91 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+
+\geometry{margin=1in}
+
+% Eliminar sangría en todo el documento
+\setlength{\parindent}{0pt}
+
+% Encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Bases de Datos II}
+\fancyhead[R]{Proyecto 3}
+\fancyfoot[C]{\thepage}
+
+
+% Definir colores para el código SQL
+\lstdefinelanguage{SQL}{
+    keywords=[1]{SELECT, FROM, WHERE, JOIN, ON, INSERT, INTO, VALUES, CREATE, TABLE, PRIMARY, KEY, REFERENCES, INT, VARCHAR, NUMERIC, DATE, SERIAL, VOID, FUNCTION, RETURNS, LANGUAGE, plpgsql, BEGIN, END, AS, GROUP, BY, SUM, COUNT, COALESCE, LEFT, JOIN, IF, NOT, EXISTS, DELETE},
+    keywordstyle=\color{blue}\bfseries,
+    morekeywords=[2]{LOAD, PERFORM, DO NOTHING, ON CONFLICT},
+    keywordstyle=[2]\color{cyan}\bfseries,
+    sensitive=false,
+    commentstyle=\color{gray}\textit,
+    morecomment=[l]{--},
+    stringstyle=\color{red},
+    morestring=[b]',
+    showstringspaces=false
+}
+
+\lstset{
+    language=SQL,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    breaklines=true,
+    frame=single,
+    moredelim=**[is][\bfseries]{@}{@},  % resaltar palabras clave
+    escapeinside={(*}{*)}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    {\Large\textbf{Tecnológico de Costa Rica}}\\[0.5cm]
+    {\Large\textbf{Escuela de Ingeniería en Computación}}\\[0.5cm]
+    {\Large\textbf{IC4302 Bases de Datos II}}\\[0.5cm]
+    {\Large\textbf{Grupo 20}}\\[2cm]
+
+    {\Large\bfseries Proyecto 3}\\[0.5cm]
+    {\Large\bfseries \emph{SparkSQL}}\\[2cm]
+
+    \textbf{\large Profesor:}\\
+    \large Alberto Shum Chan \\[1.5cm]
+
+    \textbf{\large Estudiantes:}\\[0.5cm]
+    \large Andrés Felipe Arias Corrales\\
+    2015028947\\[0.5cm]
+    \large Diego Esteban Castro Chaves\\
+    200419896\\[0.5cm]
+    \large Fabián José Fernández Fernández\\
+    2022144383\\[0.5cm]
+    \large Hengerlyn D Angiely Araya Nash\\
+    2021051418\\[2cm]
+
+    \textbf{\large Fecha de Entrega:} 15 de Noviembre del 2024\\[0.5cm]
+    \textbf{\large II semestre, 2024}
+\end{titlepage}
+
+% Agregar espacio entre párrafos
+\setlength{\parskip}{\baselineskip}
+
+\newpage  % Para que el índice quede en una página separada
+\tableofcontents  % Aquí se genera el índice
+\newpage
+\setlength{\parindent}{0pt}  % Eliminar sangría después del título
+
+\section{Introducción}
+
+\end{document}
