@@ -21,3 +21,7 @@
 
 # Do not ignore the generated PDF file
 !*.pdf
+
+*.env
+*.venv
+*.vscode
