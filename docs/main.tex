@@ -6,10 +6,11 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{graphicx}
-\usepackage{hyperref}
 \usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{booktabs}
 
-
+% Configuración del diseño
 \geometry{margin=1in}
 
 % Eliminar sangría en todo el documento
@@ -22,35 +23,21 @@
 \fancyhead[R]{Proyecto 3}
 \fancyfoot[C]{\thepage}
 
-
-% Definir colores para el código SQL
-\lstdefinelanguage{SQL}{
-    keywords=[1]{SELECT, FROM, WHERE, JOIN, ON, INSERT, INTO, VALUES, CREATE, TABLE, PRIMARY, KEY, REFERENCES, INT, VARCHAR, NUMERIC, DATE, SERIAL, VOID, FUNCTION, RETURNS, LANGUAGE, plpgsql, BEGIN, END, AS, GROUP, BY, SUM, COUNT, COALESCE, LEFT, JOIN, IF, NOT, EXISTS, DELETE},
-    keywordstyle=\color{blue}\bfseries,
-    morekeywords=[2]{LOAD, PERFORM, DO NOTHING, ON CONFLICT},
-    keywordstyle=[2]\color{cyan}\bfseries,
-    sensitive=false,
-    commentstyle=\color{gray}\textit,
-    morecomment=[l]{--},
-    stringstyle=\color{red},
-    morestring=[b]',
-    showstringspaces=false
-}
-
+% Configuración de colores para el código
 \lstset{
-    language=SQL,
+    language=Python,
     basicstyle=\ttfamily\small,
     keywordstyle=\color{blue},
     commentstyle=\color{gray},
     stringstyle=\color{red},
     breaklines=true,
     frame=single,
-    moredelim=**[is][\bfseries]{@}{@},  % resaltar palabras clave
-    escapeinside={(*}{*)}
+    showstringspaces=false
 }
 
 \begin{document}
 
+% Portada
 \begin{titlepage}
     \centering
     {\Large\textbf{Tecnológico de Costa Rica}}\\[0.5cm]
@@ -78,14 +65,181 @@
     \textbf{\large II semestre, 2024}
 \end{titlepage}
 
-% Agregar espacio entre párrafos
-\setlength{\parskip}{\baselineskip}
-
-\newpage  % Para que el índice quede en una página separada
-\tableofcontents  % Aquí se genera el índice
+% Índice
 \newpage
-\setlength{\parindent}{0pt}  % Eliminar sangría después del título
+\tableofcontents
+\newpage
 
-\section{Introducción}
+% Sección 1: Descripción General del Sistema
+\section{Descripción General del Sistema}
+
+El objetivo principal de este sistema es realizar un análisis y visualización de datos provenientes de diferentes fuentes, específicamente del Instituto Nacional de Estadística y Censos (INEC) y del Organismo de Investigación Judicial (OIJ). A través de procesos de extracción, transformación y carga (ETL), se busca integrar estos conjuntos de datos para analizar la relación entre factores socioeconómicos y criminalidad en Costa Rica.
+
+\subsection{Componentes del Sistema}
+
+\begin{itemize}
+    \item \textbf{Extracción de Datos:} Obtención de los datos de los archivos CSV del OIJ y del INEC.
+    \item \textbf{Limpieza y Preprocesamiento:} Incluye normalización de nombres de distritos, eliminación de inconsistencias, conversión de formatos, y eliminación de duplicados.
+    \item \textbf{Análisis de Datos:} Comparación de distritos y correlación entre estadísticas criminales y socioeconómicas.
+    \item \textbf{Visualización:} Gráficos y mapas de calor para explorar patrones.
+    \item \textbf{Almacenamiento:} Uso de PostgreSQL para almacenar los datos procesados.
+\end{itemize}
+
+\subsection{Tecnologías Utilizadas}
+
+\begin{itemize}
+    \item \textbf{Python:} Para la manipulación de datos y la creación de gráficos.
+    \item \textbf{PySpark:} Para el procesamiento de grandes volúmenes de datos.
+    \item \textbf{PostgreSQL:} Para el almacenamiento de datos procesados.
+    \item \textbf{Matplotlib y Seaborn:} Para la generación de gráficos detallados.
+\end{itemize}
+
+\subsection{Objetivos del Proyecto}
+
+\begin{itemize}
+    \item Identificar patrones y tendencias en la actividad criminal.
+    \item Relacionar indicadores socioeconómicos con los índices de criminalidad.
+    \item Proveer un sistema escalable y eficiente para manejar grandes volúmenes de datos.
+\end{itemize}
+
+% Sección 2: Funciones del Proyecto
+\section{Funciones del Proyecto}
+
+\subsection{Conexión a PostgreSQL}
+
+Esta función establece la conexión con la base de datos PostgreSQL para almacenar y consultar los datos procesados.
+
+\begin{lstlisting}[language=Python, caption={Función para establecer conexión con PostgreSQL}]
+import psycopg
+
+def conectar_postgresql(conn_params):
+    """
+    Conecta a PostgreSQL utilizando los parámetros de conexión.
+    Args:
+        conn_params (dict): Diccionario con los parámetros de conexión.
+    Returns:
+        Connection: Objeto de conexión a PostgreSQL.
+    """
+    try:
+        conn = psycopg.connect(**conn_params)
+        print("Conexión exitosa a PostgreSQL")
+        return conn
+    except Exception as e:
+        print(f"Error al conectar a PostgreSQL: {e}")
+        return None
+\end{lstlisting}
+
+\subsection{Limpieza de Espacios y Normalización}
+
+\begin{lstlisting}[language=Python, caption={Función para eliminar espacios y normalizar datos}]
+from pyspark.sql.functions import regexp_replace, lower
+
+def limpiar_distritos(dataframe, columna):
+    """
+    Limpia espacios y normaliza los nombres de los distritos.
+    Args:
+        dataframe: DataFrame de Spark.
+        columna: Nombre de la columna a limpiar.
+    Returns:
+        DataFrame limpio y normalizado.
+    """
+    return dataframe.withColumn(columna, regexp_replace(lower(dataframe[columna]), " ", ""))
+\end{lstlisting}
+
+\subsection{Unión de Conjuntos de Datos}
+
+\begin{lstlisting}[language=Python, caption={Función para unir datos del OIJ e INEC}]
+def unir_datos(oij_df, inec_df, columna_oij, columna_inec):
+    """
+    Une los datos del OIJ e INEC basándose en distritos comunes.
+    Args:
+        oij_df: DataFrame del OIJ.
+        inec_df: DataFrame del INEC.
+        columna_oij: Nombre de la columna de distritos del OIJ.
+        columna_inec: Nombre de la columna de distritos del INEC.
+    Returns:
+        DataFrame unido.
+    """
+    return oij_df.join(inec_df, oij_df[columna_oij] == inec_df[columna_inec])
+\end{lstlisting}
+
+% Visualizaciones
+\section{Visualización de los Datos}
+
+\subsection{Cantidad de Delitos por Distrito}
+
+\begin{lstlisting}[language=Python, caption={Visualización de delitos por distrito}]
+import matplotlib.pyplot as plt
+
+# Agrupar datos
+delitos_por_distrito = df_oij.groupBy("distrito").count().orderBy("count", ascending=False).limit(10)
+
+# Convertir a Pandas para graficar
+delitos_pd = delitos_por_distrito.toPandas()
+
+# Crear gráfico
+plt.figure(figsize=(10, 6))
+plt.bar(delitos_pd['distrito'], delitos_pd['count'], color='skyblue')
+plt.xlabel("Distrito")
+plt.ylabel("Cantidad de Delitos")
+plt.title("Delitos por Distrito")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+\end{lstlisting}
+
+\subsection{Mapa de Calor de Delitos por Hora y Tipo}
+
+\begin{lstlisting}[language=Python, caption={Mapa de calor de delitos por hora y tipo}]
+import seaborn as sns
+
+# Preparar datos
+heatmap_data = df_oij.groupBy("hora", "delito").count().toPandas().pivot(index="hora", columns="delito", values="count").fillna(0)
+
+# Graficar
+plt.figure(figsize=(12, 8))
+sns.heatmap(heatmap_data, cmap="YlGnBu", annot=True, fmt="d")
+plt.title("Mapa de Calor: Delitos por Hora y Tipo")
+plt.xlabel("Tipo de Delito")
+plt.ylabel("Hora")
+plt.show()
+\end{lstlisting}
+
+\subsection{Comparación de Factores Socioeconómicos}
+
+\begin{lstlisting}[language=Python, caption={Gráfico comparativo de factores socioeconómicos}]
+# Comparar delitos con tasa de ocupación
+merged_data = pd.merge(delitos_pd, tasa_ocupacion, on="distrito")
+
+# Crear gráfico
+plt.figure(figsize=(12, 6))
+plt.bar(merged_data["distrito"], merged_data["delitos"], label="Delitos", alpha=0.7)
+plt.plot(merged_data["distrito"], merged_data["tasa_ocupacion"], label="Tasa de Ocupación (%)", color="orange", marker="o")
+plt.title("Comparación: Delitos y Tasa de Ocupación")
+plt.xlabel("Distrito")
+plt.ylabel("Cantidad/Tasa (%)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+\end{lstlisting}
+
+% Conclusiones
+\section{Conclusiones}
+
+\begin{enumerate}
+    \item La limpieza y normalización de datos es esencial para una integración efectiva.
+    \item Las visualizaciones generadas permiten identificar patrones relevantes en los datos.
+    \item SparkSQL y PostgreSQL son herramientas complementarias que mejoran el análisis y almacenamiento de grandes volúmenes de datos.
+    \item La correlación entre factores socioeconómicos y delitos refleja desigualdades estructurales.
+\end{enumerate}
+
+% Referencias
+\section{Referencias}
+
+\begin{itemize}
+    \item Instituto Nacional de Estadística y Censos (INEC). \emph{Censo 2011: Indicadores socioeconómicos}.
+    \item Organismo de Investigación Judicial (OIJ). \emph{Estadísticas de criminalidad 2011}.
+\end{itemize}
 
 \end{document}
